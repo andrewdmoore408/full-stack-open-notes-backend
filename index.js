@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 
-const notes = [
+let notes = [
   {
     id: 1,
     content: "HTML is easy",
@@ -36,6 +36,19 @@ app.get('/api/notes/:id', (request, response) => {
 
   if (note) {
     response.json(note);
+  } else {
+    response.statusMessage = `Note id#${id} not found`;
+    response.status(404).end();
+  }
+});
+
+app.delete('/api/notes/:id', (request, response) => {
+  const id = Number(request.params.id);
+  const noteToDelete = notes.find(note => note.id === id);
+
+  if (noteToDelete) {
+    notes = notes.filter(note => note.id !== id);
+    response.status(204).end();
   } else {
     response.statusMessage = `Note id#${id} not found`;
     response.status(404).end();
