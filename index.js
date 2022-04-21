@@ -24,6 +24,10 @@ let notes = [
   },
 ];
 
+const generateID = notes.length > 0
+  ? (Math.max(...notes.map(note => note.id))) + 1
+  : 0;
+
 app.get('/', (request, response) => {
   response.send('<h1>Hello, world!</h1>');
 });
@@ -58,13 +62,20 @@ app.delete('/api/notes/:id', (request, response) => {
 });
 
 app.post('/api/notes', (request, response) => {
-  const newNote = request.body;
+  const noteInfo = request.body;
 
-  const newID = notes.length > 0
-    ? (Math.max(...notes.map(note => note.id))) + 1
-    : 0;
+  if (!noteInfo.content) {
+    return response.status(400).json({
+      error: 'content missing',
+    });
+  }
 
-  newNote.id = newID;
+  const newNote = {
+    id: generateID(),
+    date: new Date(),
+    content: noteInfo.content,
+    important: noteInfo.important || false,
+  };
 
   notes = notes.concat(newNote);
 
