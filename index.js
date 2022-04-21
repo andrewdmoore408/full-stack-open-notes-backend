@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
 
+app.use(express.json());
+
 let notes = [
   {
     id: 1,
@@ -53,6 +55,21 @@ app.delete('/api/notes/:id', (request, response) => {
     response.statusMessage = `Note id#${id} not found`;
     response.status(404).end();
   }
+});
+
+app.post('/api/notes', (request, response) => {
+  const newNote = request.body;
+
+  const newID = notes.length > 0
+    ? (Math.max(...notes.map(note => note.id))) + 1
+    : 0;
+
+  newNote.id = newID;
+
+  notes = notes.concat(newNote);
+
+  console.log(newNote);
+  response.json(newNote);
 });
 
 const PORT = 3001;
