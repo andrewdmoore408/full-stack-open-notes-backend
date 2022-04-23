@@ -6,6 +6,7 @@ const cors = require('cors');
 app.use(express.json());
 app.use(requestLogger);
 app.use(cors());
+app.use(express.static('build'));
 
 
 function requestLogger(request, response, next) {
@@ -37,9 +38,13 @@ let notes = [
   },
 ];
 
-const generateID = notes.length > 0
-  ? (Math.max(...notes.map(note => note.id))) + 1
-  : 0;
+const generateID = () => {
+  if (notes.length > 0) {
+    return (Math.max(...notes.map(note => note.id))) + 1;
+  } else {
+    return 0;
+  }
+};
 
 app.get('/', (request, response) => {
   response.send('<h1>Hello, world!</h1>');
