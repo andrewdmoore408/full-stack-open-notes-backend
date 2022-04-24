@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const app = express();
 
 const cors = require('cors');
@@ -8,6 +9,27 @@ app.use(requestLogger);
 app.use(cors());
 app.use(express.static('build'));
 
+const password = process.argv[2];
+
+const url = `mongodb+srv://andrewdmoore84:${password}@fsomongo.c5ioy.mongodb.net/noteApp?retryWrites=true&w=majority`;
+
+mongoose.connect(url);
+
+const noteSchema = new mongoose.Schema({
+  content: String,
+  date: Date,
+  important: Boolean,
+});
+
+noteSchema.set('toJSON', {
+  transform: (document, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString();
+    delete returnedObject._id;
+    delete returnedObject.__v;
+  }
+});
+
+const Note = mongoose.model('Note', noteSchema);
 
 function requestLogger(request, response, next) {
   console.log('Method: ', request.method);
@@ -51,7 +73,9 @@ app.get('/', (request, response) => {
 });
 
 app.get('/api/notes', (request, response) => {
-  response.json(notes);
+  Note.find({}).then(notes => {
+    response.json(notes);
+  });
 });
 
 app.get('/api/notes/:id', (request, response) => {
