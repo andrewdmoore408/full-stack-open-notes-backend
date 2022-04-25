@@ -61,15 +61,9 @@ app.get('/api/notes', (request, response) => {
 });
 
 app.get('/api/notes/:id', (request, response) => {
-  const id = Number(request.params.id);
-  const note = notes.find(note => note.id === id);
+  const id = request.params.id;
 
-  if (note) {
-    response.json(note);
-  } else {
-    response.statusMessage = `Note id#${id} not found`;
-    response.status(404).end();
-  }
+  Note.findById(id).then(note => response.json(note));
 });
 
 app.delete('/api/notes/:id', (request, response) => {
