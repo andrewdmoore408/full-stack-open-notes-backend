@@ -1,5 +1,9 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const Note = require('./models/note');
+
+
 const app = express();
 
 const cors = require('cors');
@@ -8,28 +12,6 @@ app.use(express.json());
 app.use(requestLogger);
 app.use(cors());
 app.use(express.static('build'));
-
-const password = process.argv[2];
-
-const url = `mongodb+srv://andrewdmoore84:${password}@fsomongo.c5ioy.mongodb.net/noteApp?retryWrites=true&w=majority`;
-
-mongoose.connect(url);
-
-const noteSchema = new mongoose.Schema({
-  content: String,
-  date: Date,
-  important: Boolean,
-});
-
-noteSchema.set('toJSON', {
-  transform: (document, returnedObject) => {
-    returnedObject.id = returnedObject._id.toString();
-    delete returnedObject._id;
-    delete returnedObject.__v;
-  }
-});
-
-const Note = mongoose.model('Note', noteSchema);
 
 function requestLogger(request, response, next) {
   console.log('Method: ', request.method);
@@ -112,17 +94,15 @@ app.post('/api/notes', (request, response) => {
     });
   }
 
-  const newNote = {
-    id: generateID(),
-    date: new Date(),
+  const newNote = new Note({
     content: noteInfo.content,
     important: noteInfo.important || false,
-  };
+    date: new Date(),
+  });
 
-  notes = notes.concat(newNote);
-
-  console.log(newNote);
-  response.json(newNote);
+  newNote.save().then(savedNote => {
+    response.json(savedNote);
+  });
 });
 
 const unknownEndpoint = (request, response, next) => {
@@ -131,7 +111,7 @@ const unknownEndpoint = (request, response, next) => {
 
 app.use(unknownEndpoint);
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
