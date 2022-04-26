@@ -8,10 +8,10 @@ const app = express();
 
 const cors = require('cors');
 
+app.use(express.static('build'));
 app.use(express.json());
 app.use(requestLogger);
 app.use(cors());
-app.use(express.static('build'));
 
 function requestLogger(request, response, next) {
   console.log('Method: ', request.method);
@@ -60,10 +60,19 @@ app.get('/api/notes', (request, response) => {
   });
 });
 
-app.get('/api/notes/:id', (request, response) => {
+app.get('/api/notes/:id', (request, response, next) => {
   const id = request.params.id;
 
-  Note.findById(id).then(note => response.json(note));
+  Note.findById(id)
+    .then(note => {
+      if (note) {
+        response.json(note);
+      } else {
+        response.statusMessage = `Note id#${id} not found`;
+        response.status(404).end();
+      }
+    })
+    .catch(error => next(error));
 });
 
 app.delete('/api/notes/:id', (request, response) => {
@@ -104,6 +113,18 @@ const unknownEndpoint = (request, response, next) => {
 };
 
 app.use(unknownEndpoint);
+
+function errorHandler(error, request, response, next) {
+  console.error(error.message);
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'Malformatted id' });
+  }
+
+  next(error);
+}
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
