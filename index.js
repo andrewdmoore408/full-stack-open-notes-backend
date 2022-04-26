@@ -75,17 +75,24 @@ app.get('/api/notes/:id', (request, response, next) => {
     .catch(error => next(error));
 });
 
-app.delete('/api/notes/:id', (request, response) => {
-  const id = Number(request.params.id);
-  const noteToDelete = notes.find(note => note.id === id);
+app.delete('/api/notes/:id', (request, response, next) => {
+  const id = request.params.id;
 
-  if (noteToDelete) {
-    notes = notes.filter(note => note.id !== id);
-    response.status(204).end();
-  } else {
-    response.statusMessage = `Note id#${id} not found`;
-    response.status(404).end();
-  }
+  Note.findByIdAndRemove(id)
+    .then(result => {
+      response.status(204).end();
+    })
+    .catch(error => next(error));
+
+  // const noteToDelete = notes.find(note => note.id === id);
+
+  // if (noteToDelete) {
+  //   notes = notes.filter(note => note.id !== id);
+  //   response.status(204).end();
+  // } else {
+  //   response.statusMessage = `Note id#${id} not found`;
+  //   response.status(404).end();
+  // }
 });
 
 app.post('/api/notes', (request, response) => {
