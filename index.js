@@ -83,16 +83,6 @@ app.delete('/api/notes/:id', (request, response, next) => {
       response.status(204).end();
     })
     .catch(error => next(error));
-
-  // const noteToDelete = notes.find(note => note.id === id);
-
-  // if (noteToDelete) {
-  //   notes = notes.filter(note => note.id !== id);
-  //   response.status(204).end();
-  // } else {
-  //   response.statusMessage = `Note id#${id} not found`;
-  //   response.status(404).end();
-  // }
 });
 
 app.post('/api/notes', (request, response) => {
@@ -113,6 +103,22 @@ app.post('/api/notes', (request, response) => {
   newNote.save().then(savedNote => {
     response.json(savedNote);
   });
+});
+
+app.put('/api/notes/:id', (request, response, next) => {
+  const id = request.params.id;
+  const body = request.body;
+
+  const note = {
+    content: body.content,
+    important: body.important,
+  };
+
+  Note.findByIdAndUpdate(id, note, {new: true})
+    .then(updatedNote => {
+      response.json(updatedNote);
+    })
+    .catch(error => next(error));
 });
 
 const unknownEndpoint = (request, response, next) => {
