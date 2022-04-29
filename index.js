@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
+require('mongoose');
 const Note = require('./models/note');
 
 
@@ -20,35 +20,6 @@ function requestLogger(request, response, next) {
   console.log('---');
   next();
 }
-
-let notes = [
-  {
-    id: 1,
-    content: "HTML is easy",
-    date: "2022-05-30T17:30:31.098Z",
-    important: true
-  },
-  {
-    id: 2,
-    content: "Browser can execute only Javascript",
-    date: "2022-05-30T18:39:34.091Z",
-    important: false
-  },
-  {
-    id: 3,
-    content: "GET and POST are the most important methods of HTTP protocol",
-    date: "2022-05-30T19:20:14.298Z",
-    important: true
-  },
-];
-
-const generateID = () => {
-  if (notes.length > 0) {
-    return (Math.max(...notes.map(note => note.id))) + 1;
-  } else {
-    return 0;
-  }
-};
 
 app.get('/', (request, response) => {
   response.send('<h1>Hello, world!</h1>');
@@ -79,7 +50,8 @@ app.delete('/api/notes/:id', (request, response, next) => {
   const id = request.params.id;
 
   Note.findByIdAndRemove(id)
-    .then(result => {
+  // eslint-disable-next-line no-unused-vars
+    .then(_ => {
       response.status(204).end();
     })
     .catch(error => next(error));
@@ -113,8 +85,8 @@ app.put('/api/notes/:id', (request, response, next) => {
 
   Note.findByIdAndUpdate(
     id,
-    {content, important},
-    {new: true, runValidators: true, context:'query'}
+    { content, important },
+    { new: true, runValidators: true, context:'query' }
   )
     .then(updatedNote => {
       response.json(updatedNote);
@@ -122,7 +94,7 @@ app.put('/api/notes/:id', (request, response, next) => {
     .catch(error => next(error));
 });
 
-const unknownEndpoint = (request, response, next) => {
+const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' });
 };
 
@@ -134,7 +106,7 @@ function errorHandler(error, request, response, next) {
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'Malformatted id' });
   } else if (error.name === 'ValidationError') {
-    return response.status(400).json({error: error.message});
+    return response.status(400).json({ error: error.message });
   }
 
   next(error);
@@ -142,6 +114,7 @@ function errorHandler(error, request, response, next) {
 
 app.use(errorHandler);
 
+// eslint-disable-next-line no-undef
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

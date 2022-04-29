@@ -1,7 +1,8 @@
+/* global process */
 const mongoose = require('mongoose');
 
 if (process.argv.length < 3) {
-  console.log("Your MongoDB password is required: 'node mongo.js <password>'");
+  console.log('Your MongoDB password is required: \'node mongo.js <password>\'');
   process.exit(1);
 }
 
@@ -19,7 +20,7 @@ const noteSchema = new mongoose.Schema({
 
 const Note = mongoose.model('Note', noteSchema);
 
-Note.find({important: false}).then(result => {
+Note.find({ important: false }).then(result => {
   result.forEach(note => {
     console.log(note);
   });
