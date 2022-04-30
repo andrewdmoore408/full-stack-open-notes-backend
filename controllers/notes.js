@@ -7,19 +7,21 @@ notesRouter.get('/', async (request, response) => {
   response.json(notes);
 });
 
-notesRouter.get('/:id', (request, response, next) => {
+notesRouter.get('/:id', async (request, response, next) => {
   const id = request.params.id;
 
-  Note.findById(id)
-    .then(note => {
-      if (note) {
-        response.json(note);
-      } else {
-        response.statusMessage = `Note id#${id} not found`;
-        response.status(404).end();
-      }
-    })
-    .catch(error => next(error));
+  try {
+    const foundNote = await Note.findById(id);
+
+    if (foundNote) {
+      response.json(foundNote);
+    } else {
+      response.statusMessage = `Note id#${id} not found`;
+      response.status(404).end();
+    }
+  } catch (error) {
+    next(error);
+  }
 });
 
 notesRouter.post('/', async (request, response, next) => {
@@ -45,15 +47,15 @@ notesRouter.post('/', async (request, response, next) => {
   }
 });
 
-notesRouter.delete('/:id', (request, response, next) => {
+notesRouter.delete('/:id', async (request, response, next) => {
   const id = request.params.id;
 
-  Note.findByIdAndRemove(id)
-  // eslint-disable-next-line no-unused-vars
-    .then(_ => {
-      response.status(204).end();
-    })
-    .catch(error => next(error));
+  try {
+    await Note.findByIdAndRemove(id);
+    response.status(204).end();
+  } catch (error) {
+    next(error);
+  }
 });
 
 notesRouter.put('/:id', (request, response, next) => {
