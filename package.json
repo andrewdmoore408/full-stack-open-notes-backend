@@ -22,6 +22,7 @@
     "express": "^4.17.3",
     "express-async-errors": "^3.1.1",
     "heroku": "^7.60.1",
+    "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.3.1",
     "static": "^2.0.0"
   },
